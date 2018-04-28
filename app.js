@@ -27,6 +27,27 @@ const ItemCtrl = (function() {
       return data.items;
     },
 
+    addItem: function(name, calories) {
+
+      // Create Id
+      let ID;
+      if (data.items.length > 0) {
+        ID = data.items[data.items.length - 1].id + 1;
+      } else {
+        ID = 0;
+      }
+
+      calories = parseInt(calories);
+
+      // Create new item
+      const newItem = new Item(ID, name, calories);
+
+      // Add new item to array
+      data.items.push(newItem);
+
+      return newItem;
+    },
+
     logData: function() {
       return data;
     }
@@ -37,7 +58,10 @@ const ItemCtrl = (function() {
 const UICtrl = (function() {
 
   const UISelectors = {
-    itemList: '#item-list'
+    itemList: '#item-list',
+    addBtn: '.add-btn',
+    itemNameInput: '#item-name',
+    itemCaloriesInput: '#item-calories'
   }
 
   // Public methods  
@@ -54,6 +78,17 @@ const UICtrl = (function() {
       </li>`;
       });
       document.querySelector(UISelectors.itemList).innerHTML = html;
+    },
+
+    getItemInput: function() {
+      return {
+        name: document.querySelector(UISelectors.itemNameInput).value,
+        calories: document.querySelector(UISelectors.itemCaloriesInput).value
+      }
+    },
+
+    getSelectors: function() {
+      return UISelectors;
     }
   }  
 })();
@@ -61,12 +96,39 @@ const UICtrl = (function() {
 // App controler
 const App = (function(ItemCtrl, UICtrl) {
 
+  // Load event listeners
+  const loadEventListeners = function() {
+    const UISelectors = UICtrl.getSelectors();
+
+    // Add item event
+    document.querySelector(UISelectors.addBtn).addEventListener('click', itemAddSubmit);
+  };
+
+  // Add item submit
+  const itemAddSubmit = function(e){
+
+    // Get form input from UICtrl
+    const input = UICtrl.getItemInput();
+
+    if (input.name !== '' && input.calories !== '') {
+      
+      // Add item
+      const newItem = ItemCtrl.addItem(input.name, input.calories)
+    } 
+    e.preventDefault();
+  }
+
   // Public methods  
   return {
     init: function() {
+      // Fetch items from data structure
       const items = ItemCtrl.getItems();
-      // console.log(items);
-      UICtrl.populateItemList(items)
+    
+      // Populate list with items
+      UICtrl.populateItemList(items);
+      
+      
+      loadEventListeners();
     }
 
   }
